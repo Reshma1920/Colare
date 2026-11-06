@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colare – Question calibration loop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--side:#24186B;--side-2:#2F2287;--side-3:#3A2BA3;--side-ink:#DAD5FA;--accent:#6438B1;--accent-soft:#F0EBF8;--font:'Geist',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font:14px/20px var(--font);-webkit-font-smoothing:antialiased;background:#F5F5F8}
+.app{display:flex;height:100%}
+.side{width:228px;flex:none;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;padding:20px 14px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 10px 26px;font-weight:600;font-size:16px;color:#fff}
+.brand .mark{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent)}
+.nav{display:flex;align-items:center;gap:11px;height:38px;padding:0 12px;border-radius:9px;color:var(--side-ink);margin-bottom:2px;text-decoration:none;border:0;background:transparent;width:100%;text-align:left;cursor:pointer;font:inherit}
+.nav:hover{background:var(--side-2);color:#fff}
+.nav.on{background:var(--side-3);color:#fff;font-weight:500}
+.nav small{margin-left:auto;font-size:11px;color:#A9A0E6}
+.grp{font-size:11px;color:#8C82D6;padding:14px 12px 6px;letter-spacing:.02em}
+.ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--side-2)}
+.me b{color:#fff;font-weight:500;display:block}
+.me small{font-size:12px;color:#A9A0E6}
+.av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;background:var(--accent);color:#fff;flex:none}
+.stage{flex:1;min-width:0;position:relative}
+.stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:none;background:#F5F5F8}
+.stage iframe.on{display:block}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
+  <symbol id="i-team" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5c2 .7 3 2.6 3.5 5.5"/></symbol>
+</svg>
+<div class="app">
+  <nav class="side" aria-label="Main">
+    <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M19 7.5A8 8 0 1 0 19 16.5"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg></span>Colare</div>
+    <button class="nav" data-go="dashboard"><svg class="ic"><use href="#i-grid"/></svg>Dashboard</button>
+    <span class="grp">The loop</span>
+    <button class="nav" data-go="author"><svg class="ic"><use href="#i-pen"/></svg>Author<small>1</small></button>
+    <button class="nav" data-go="reviewer"><svg class="ic"><use href="#i-eye"/></svg>Reviewer<small>2</small></button>
+    <button class="nav" data-go="tester"><svg class="ic"><use href="#i-user"/></svg>Tester<small>3</small></button>
+    <span class="grp">Settings</span>
+    <button class="nav" data-go="team"><svg class="ic"><use href="#i-team"/></svg>Team management</button>
+    <div class="me"><span class="av">MC</span><span><b>Maya Chen</b><small>Reviewer</small></span></div>
+  </nav>
+  <div class="stage" id="stage"></div>
+</div>
+<script>
+const PAGES = { dashboard: 'dashboard.html', author: 'author.html', reviewer: 'reviewer.html', tester: 'tester.html', team: 'team.html' };
+const stage = document.getElementById('stage');
+const frames = {};
+function go(k) {
+  if (!PAGES[k]) k = 'dashboard';
+  if (!frames[k]) {
+    const f = document.createElement('iframe');
+    f.src = PAGES[k]; f.title = k;
+    stage.appendChild(f); frames[k] = f;
+  }
+  Object.entries(frames).forEach(([n, f]) => f.classList.toggle('on', n === k));
+  document.querySelectorAll('.nav').forEach((b) => { const on = b.dataset.go === k; b.classList.toggle('on', on); b.setAttribute('aria-current', on ? 'page' : 'false'); });
+  if (location.hash !== '#' + k) history.replaceState(null, '', '#' + k);
+}
+document.querySelector('.side').addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+window.addEventListener('message', (e) => { if (e.data && e.data.go) go(e.data.go); });
+go((location.hash || '#dashboard').slice(1));
+</script>
+</body>
+</html>

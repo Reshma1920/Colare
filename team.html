@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colare – Team management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F5F8;--surface:#fff;--hover:#F2F0FB;--ink:#1C1B22;--muted:#615F6E;--faint:#8E8C99;--line:#E3E2EA;--line-soft:#EEEDF3;--accent:#6438B1;--accent-hover:#552F99;--accent-soft:#F0EBF8;--ok:#22804F;--wf-1:#DCD8EF;--wf-2:#ECEAF6;--font:'Geist',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;--shadow:0 1px 2px rgba(28,27,34,.04),0 2px 8px rgba(28,27,34,.03)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/20px var(--font);-webkit-font-smoothing:antialiased}
+button,select{font:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:600}
+.ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.page{max-width:1080px;margin:0 auto;padding:40px 36px 64px;display:flex;flex-direction:column;gap:22px}
+.phead{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.phead h1{font-size:28px;line-height:34px;letter-spacing:-.02em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-weight:500;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-hover)}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.bar{display:block;height:9px;border-radius:4px;background:var(--wf-2)}
+.bar.t{height:12px;background:var(--wf-1)}
+.head,.row{display:grid;grid-template-columns:minmax(0,1.6fr) 180px 160px 40px;align-items:center;gap:18px;padding:0 22px}
+.head{height:42px;font-size:12px;color:var(--faint);font-weight:500;border-bottom:1px solid var(--line-soft)}
+.row{min-height:64px;border-bottom:1px solid var(--line-soft)}
+.row:last-child{border-bottom:0}
+.who{display:flex;align-items:center;gap:12px}
+.who .bars{display:flex;flex-direction:column;gap:7px;flex:1}
+.av{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:11px;font-weight:600;flex:none}
+.av.t{background:#ECEBF2;color:var(--muted)}
+select{height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px;background:#fff;width:100%}
+.tag{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:7px;border:1px solid var(--line);font-size:12px;font-weight:500;color:var(--muted)}
+.tag.you{border-color:var(--accent);color:var(--accent)}
+.sec{display:flex;align-items:center;justify-content:space-between}
+.sec h3{font-size:15px}
+.perm{width:100%;border-collapse:collapse}
+.perm th,.perm td{height:44px;padding:0 18px;border-bottom:1px solid var(--line-soft);text-align:center;font-size:13px}
+.perm th{font-size:12px;color:var(--faint);font-weight:500}
+.perm th:first-child,.perm td:first-child{text-align:left}
+.perm tr:last-child td{border-bottom:0}
+.yes{color:var(--accent)} .no{color:#C8C5D6}
+.toggleh{display:flex;align-items:center;gap:8px;border:0;background:transparent;cursor:pointer;font-weight:600;font-size:15px;padding:0}
+.toggleh .ic{transition:transform .15s}
+.toggleh.open .ic{transform:rotate(90deg)}
+.scrim{position:fixed;inset:0;background:rgba(36,24,107,.22);z-index:40}
+.modal-w{position:fixed;inset:0;display:grid;place-items:center;z-index:41;padding:20px}
+.modal{width:100%;max-width:460px;background:#fff;border-radius:16px;box-shadow:0 28px 70px rgba(36,24,107,.28);padding:24px;display:flex;flex-direction:column;gap:16px}
+.modal h3{font-size:18px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:13px;font-weight:500}
+.inp{height:38px;border:1px solid var(--line);border-radius:9px;padding:0 12px;display:flex;align-items:center}
+.mrow{display:flex;justify-content:flex-end;gap:10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#24186B;color:#fff;padding:11px 15px;border-radius:11px;font-size:13px;z-index:60}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+</svg>
+<main id="main"></main>
+<div id="layer"></div>
+<script>
+const ic = (n) => `<svg class="ic"><use href="#i-${n}"/></svg>`;
+const S = {
+  people: [
+    { ini: 'MC', role: 'Reviewer', you: true, w: [38, 54] },
+    { ini: 'SR', role: 'Author', w: [44, 60] },
+    { ini: 'JP', role: 'Reviewer', w: [34, 48] },
+    { ini: 'DK', role: 'Approver', w: [40, 58] },
+  ],
+  perms: false, modal: false, toast: '',
+};
+const ROLES = ['Author', 'Reviewer', 'Approver'];
+const PERMS = [
+  ['Write and edit questions', [1, 0, 0]],
+  ['Leave comments', [1, 1, 1]],
+  ['Assign testers and run rounds', [0, 1, 0]],
+  ['Approve questions', [0, 1, 1]],
+  ['Publish the assessment', [0, 0, 1]],
+];
+function render() {
+  document.getElementById('main').innerHTML = `
+  <div class="page">
+    <div class="phead"><h1>Team management</h1><button class="btn primary" data-act="invite">${ic('plus')}Invite people</button></div>
+    <section class="card">
+      <div class="head"><span>Person</span><span>Role</span><span>Access</span><span></span></div>
+      ${S.people.map((p, i) => `
+      <div class="row">
+        <span class="who"><span class="av">${p.ini}</span><span class="bars"><span class="bar t" style="width:${p.w[0]}%"></span><span class="bar" style="width:${p.w[1]}%"></span></span></span>
+        <span><select data-i="${i}" aria-label="Role">${ROLES.map((r) => `<option ${r === p.role ? 'selected' : ''}>${r}</option>`).join('')}</select></span>
+        <span>${p.you ? '<span class="tag you">You</span>' : '<span class="tag">Full access</span>'}</span>
+        <button class="btn quiet" style="width:36px;padding:0" aria-label="More">${ic('dots')}</button>
+      </div>`).join('')}
+      <div class="row">
+        <span class="who"><span class="av t">16</span><span class="bars"><b style="font-weight:500">Testers</b><span class="bar" style="width:40%"></span></span></span>
+        <span class="tag" style="justify-self:start">${ic('link')}&nbsp;Test link only</span>
+        <span class="tag">No dashboard access</span>
+        <span></span>
+      </div>
+    </section>
+
+    <div class="sec"><button class="toggleh ${S.perms ? 'open' : ''}" data-act="perms" aria-expanded="${S.perms}">${ic('right')}What each role can do</button></div>
+    ${S.perms ? `<section class="card"><table class="perm">
+      <thead><tr><th></th>${ROLES.map((r) => `<th>${r}</th>`).join('')}</tr></thead>
+      <tbody>${PERMS.map(([t, a]) => `<tr><td>${t}</td>${a.map((y) => `<td class="${y ? 'yes' : 'no'}">${y ? ic('check') : '–'}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table></section>` : ''}
+  </div>`;
+  document.getElementById('layer').innerHTML = (S.modal ? `
+    <div class="scrim" data-act="close"></div>
+    <div class="modal-w"><div class="modal" role="dialog" aria-label="Invite people">
+      <h3>Invite people</h3>
+      <div class="field"><label>Email</label><div class="inp"><span class="bar" style="width:60%"></span></div></div>
+      <div class="field"><label>Role</label><select>${ROLES.map((r) => `<option>${r}</option>`).join('')}</select></div>
+      <div class="mrow"><button class="btn quiet" data-act="close">Cancel</button><button class="btn primary" data-act="send">Send invite</button></div>
+    </div></div>` : '') + (S.toast ? `<div class="toast">${S.toast}</div>` : '');
+}
+const A = {
+  invite: () => { S.modal = true; },
+  close: () => { S.modal = false; },
+  send: () => { S.modal = false; S.toast = 'Invite sent'; setTimeout(() => { S.toast = ''; render(); }, 2200); },
+  perms: () => { S.perms = !S.perms; },
+};
+document.addEventListener('click', (e) => { const el = e.target.closest('[data-act]'); if (!el) return; const f = A[el.dataset.act]; if (f) { f(); render(); } });
+document.addEventListener('change', (e) => { if (e.target.dataset.i) S.people[e.target.dataset.i].role = e.target.value; });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.modal) { S.modal = false; render(); } });
+render();
+</script>
+</body>
+</html>

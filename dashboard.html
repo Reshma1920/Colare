@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colare – Project dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --side:#24186B; --side-2:#2F2287; --side-3:#3A2BA3; --side-ink:#DAD5FA;
+  --bg:#F5F5F8; --surface:#fff; --hover:#F2F0FB; --ink:#1C1B22; --muted:#615F6E; --faint:#8E8C99;
+  --line:#E3E2EA; --line-soft:#EEEDF3;
+  --accent:#6438B1; --accent-hover:#552F99; --accent-soft:#F0EBF8;
+  --ok:#22804F; --ok-soft:#E5F4EB; --warn:#A8620F; --warn-soft:#FCF1E2; --bad:#B4412F;
+  --wf-1:#DCD8EF; --wf-2:#ECEAF6;
+  --font:'Geist',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --shadow:0 1px 2px rgba(28,27,34,.04),0 2px 8px rgba(28,27,34,.03);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/20px var(--font);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;font-weight:600}
+p{margin:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* shell (same as author / reviewer) */
+.app{display:flex;height:100%}
+.side{width:228px;flex:none;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;padding:20px 14px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 10px 26px;font-weight:600;font-size:16px;color:#fff}
+.brand .mark{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent)}
+.nav{display:flex;align-items:center;gap:11px;height:38px;padding:0 12px;border-radius:9px;color:var(--side-ink);margin-bottom:2px;text-decoration:none}
+.nav:hover{background:var(--side-2);color:#fff}
+.nav.on{background:var(--side-3);color:#fff;font-weight:500}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--side-2)}
+.me b{color:#fff;font-weight:500;display:block}
+.me small{font-size:12px;color:#A9A0E6}
+.av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;background:var(--accent);color:#fff;flex:none}
+.main{flex:1;min-width:0;overflow:auto}
+
+/* header with the shared 5-segment progress */
+.head{background:var(--surface);border-bottom:1px solid var(--line)}
+.head .in{max-width:1180px;margin:0 auto;padding:14px 36px;display:flex;align-items:center;gap:16px}
+.logo{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:600;flex:none}
+.head h1{font-size:17px;line-height:22px}
+.head .co{font-size:13px;color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:7px;border:1px solid var(--line);font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap}
+.prog{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.prog b{font-size:13px;font-weight:500;white-space:nowrap}
+.steps{display:flex;gap:4px;width:200px}
+.steps i{flex:1;height:5px;border-radius:3px;background:#E3E2EA}
+.steps i.on{background:var(--accent)}
+
+/* body */
+.body{max-width:1180px;margin:0 auto;padding:22px 36px 72px;display:flex;flex-direction:column;gap:20px}
+.tabs{display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--line)}
+.tab{height:40px;padding:0 14px;border:0;background:transparent;cursor:pointer;color:var(--muted);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.newr{margin-left:6px;height:30px;padding:0 10px;border-radius:8px;border:1px dashed #C8C5D6;background:transparent;color:var(--accent);font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.newr:hover{background:var(--hover)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-weight:500;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-hover)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.primary[disabled]{background:#D3D1DC;border-color:#D3D1DC;opacity:1}
+.btn.sm{height:30px;padding:0 11px;font-size:13px}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.quiet:hover{background:var(--hover);color:var(--ink)}
+.btn.link{border:0;background:transparent;color:var(--accent);padding:0;height:auto}
+.btn.link:hover{text-decoration:underline;background:transparent}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.sech{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sech h3{font-size:15px}
+
+/* wireframe bars */
+.bar{display:block;height:9px;border-radius:4px;background:var(--wf-2)}
+.bar.t{height:12px;background:var(--wf-1)}
+.bars{display:flex;flex-direction:column;gap:8px}
+.qn{width:32px;height:32px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+
+/* verdict */
+.verdict{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+.verdict .l{padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+.verdict h2{font-size:22px;line-height:28px;letter-spacing:-.02em}
+.verdict .r{border-left:1px solid var(--line-soft);padding:22px 24px;display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;align-content:start}
+.verdict .r div{display:flex;flex-direction:column;gap:2px}
+.verdict small{font-size:12px;color:var(--faint)}
+.verdict .r b{font-weight:600;font-size:15px}
+.split{display:flex;height:8px;gap:3px}
+.split i{border-radius:4px}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:8px;height:8px;border-radius:2px}
+
+/* evidence meter */
+.ev3{display:inline-flex;align-items:center;gap:8px}
+.ev3 .m{display:flex;gap:2px}
+.ev3 .m i{width:14px;height:6px;border-radius:2px;background:var(--line)}
+.ev3 .m i.on{background:var(--accent)}
+.ev3 b{font-weight:500;font-size:13px}
+.info{position:relative;display:inline-grid;place-items:center;width:16px;height:16px;color:var(--faint);cursor:help;vertical-align:middle;margin-left:4px}
+.info .ic{width:14px;height:14px}
+.info .tip{display:none;position:absolute;top:22px;left:-12px;width:260px;padding:12px 14px;border-radius:10px;background:var(--side);color:#fff;font-size:12px;line-height:18px;font-weight:400;z-index:20;text-align:left;box-shadow:0 12px 30px rgba(36,24,107,.25)}
+.info:hover .tip,.info:focus .tip{display:block}
+.tip b{display:block;font-weight:600;margin-bottom:6px}
+.tip span{display:flex;gap:8px;align-items:center}
+.tip span::before{content:"";width:4px;height:4px;border-radius:50%;background:#B9A6DA;flex:none}
+.chip.appr{border:1px solid var(--ok);background:var(--ok);color:#fff}
+.chip.appr i{background:#fff}
+.dash{color:var(--faint)}
+.chip.queued{color:var(--accent)}
+.enote{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;color:var(--muted)}
+.enote .ic{color:var(--accent)}
+.enote b{color:var(--ink);font-weight:500}
+.syn{display:flex;gap:18px;flex-wrap:wrap;padding:12px 14px;border-radius:10px;background:var(--accent-soft);font-size:13px;color:var(--muted)}
+.syn b{color:var(--ink);font-weight:600}
+.syn .h{width:100%;font-size:12px;font-weight:500;color:var(--accent)}
+.fld{display:flex;flex-direction:column;gap:7px}
+.fld label{font-size:13px;font-weight:500}
+.fbox{border:1px solid var(--line);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:8px;background:#fff}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:11px;cursor:pointer;background:#fff;text-align:left;width:100%}
+.opt.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.opt .rd{width:18px;height:18px;border-radius:50%;border:1.5px solid #C8C5D6;flex:none;margin-top:1px;display:grid;place-items:center}
+.opt.on .rd{border-color:var(--accent)}
+.opt.on .rd::after{content:'';width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.opt b{display:block;font-weight:500}
+.opt small{font-size:12px;color:var(--faint)}
+.qchips{display:flex;gap:8px;justify-content:center}
+.seg2{display:inline-flex;padding:3px;border-radius:9px;background:#ECEBF2;gap:2px;margin:0 20px}
+.seg2 button{height:30px;padding:0 14px;border-radius:7px;border:0;background:transparent;cursor:pointer;font-weight:500;color:var(--muted)}
+.seg2 button.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+.evkey{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.evkey .k{display:inline-flex;align-items:center;gap:6px}
+.evkey .k i{width:5px;height:5px;border-radius:50%;background:var(--faint)}
+
+/* question table */
+.qhead,.qrow{display:grid;grid-template-columns:minmax(0,1.7fr) 110px 110px 120px 130px 120px 24px;align-items:center;gap:16px;padding:0 20px}
+.qhead{height:40px;font-size:12px;color:var(--faint);font-weight:500;border-bottom:1px solid var(--line-soft)}
+.qwrap{border-bottom:1px solid var(--line-soft)}
+.qwrap:last-child{border-bottom:0}
+.qwrap.open{background:#FCFCFE}
+.qrow{min-height:76px;cursor:pointer;width:100%;border:0;background:transparent;text-align:left}
+.qrow:hover{background:#FBFBFD}
+.qname{display:flex;align-items:center;gap:12px;min-width:0}
+.qname .bars{flex:1;gap:7px}
+.ver{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+.ver b{font-weight:500;color:var(--ink)}
+.mini b{font-weight:600}.mini small{font-size:12px;color:var(--faint)}
+.rr{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--faint)}
+.rr div{display:flex;align-items:center;gap:8px}
+.rr div > span:first-child{width:18px}
+.rr b{font-weight:600;color:var(--ink);font-size:13px;min-width:30px}
+.rr.now div:last-child b{color:var(--ink)}
+.rr div.old b{color:var(--muted);font-weight:500}
+.dots{display:flex;gap:2px}
+.dots i{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--accent)}
+.dots i.p{background:var(--accent)}
+.old .dots i{border-color:#B9A6DA}
+.old .dots i.p{background:#B9A6DA}
+.chip{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap;border:1px dashed currentColor}
+.chip i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.chip.good{color:var(--ok)}
+.chip.change{color:var(--warn)}
+.chip.solid.good{background:var(--ok);border:1px solid var(--ok);color:#fff}
+.chip.solid.change{background:var(--warn);border:1px solid var(--warn);color:#fff}
+.chip.solid i{background:#fff}
+.chev{color:var(--faint);transition:transform .15s}
+.qwrap.open .chev{transform:rotate(180deg)}
+
+/* expanded */
+.ex{padding:4px 20px 20px 64px;display:flex;flex-direction:column;gap:14px}
+.why{display:flex;flex-wrap:wrap;gap:8px}
+.why span{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px;border-radius:8px;background:#fff;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+.why span .ic{width:14px;height:14px;color:var(--accent)}
+.exg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.box h4{font-size:12px;color:var(--faint);font-weight:500;display:flex;align-items:center;justify-content:space-between}
+.chk{display:flex;align-items:center;gap:9px;font-size:13px}
+.chk .c{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;flex:none}
+.chk.y .c{background:var(--accent);color:#fff}
+.chk.n .c{border:1.5px dashed #C8C5D6}
+.chk.n{color:var(--faint)}
+.chk .c .ic{width:11px;height:11px;stroke-width:2.6}
+.lvl{display:grid;grid-template-columns:52px 1fr 34px;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.lvl .tb{height:8px;border-radius:4px;background:var(--line-soft);overflow:hidden}
+.lvl .tb i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.lvl b{font-weight:500;color:var(--ink);text-align:right}
+.taps{display:flex;flex-direction:column;gap:7px}
+.taps div{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted)}
+.taps b{font-weight:600;color:var(--ink)}
+.dec{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dec .grow{flex:1}
+.cnote{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid #F0D8B4;background:var(--warn-soft);font-size:13px}
+.cnote .ic{color:var(--warn);margin-top:2px}
+.cnote .bars{flex:1;padding-top:4px}
+.cnote .bars .bar{background:#F3E2C8}
+textarea.input{width:100%;min-height:72px;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font:inherit;resize:vertical;background:#fff}
+textarea.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.foot{display:flex;align-items:center;gap:12px;justify-content:flex-end}
+.foot .left{margin-right:auto;font-size:13px;color:var(--muted)}
+.pubok{display:flex;align-items:center;gap:10px;font-weight:500;color:var(--ok)}
+
+/* round view */
+.rmeta{display:flex;gap:30px;padding:18px 22px;flex-wrap:wrap}
+.rmeta div{display:flex;flex-direction:column;gap:2px}
+.rmeta small{font-size:12px;color:var(--faint)}
+.rmeta b{font-weight:600}
+.matrix{overflow:auto}
+.matrix table{border-collapse:collapse;width:100%;min-width:760px}
+.matrix th,.matrix td{padding:0 12px;height:44px;border-bottom:1px solid var(--line-soft);text-align:center;font-size:13px}
+.matrix th{font-size:12px;color:var(--faint);font-weight:500;height:40px}
+.matrix th:first-child,.matrix td:first-child{text-align:left;padding-left:20px;width:220px}
+.matrix tbody tr:last-child td{border-bottom:1px solid var(--line-soft)}
+.matrix tfoot td{font-weight:600;background:#FBFBFD;border-bottom:0}
+.tname{display:flex;align-items:center;gap:10px}
+.tname .a{width:24px;height:24px;border-radius:50%;background:var(--wf-2);flex:none}
+.lv{font-size:12px;color:var(--muted)}
+.cell{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;position:relative}
+.cell.p{background:var(--accent);color:#fff}
+.cell.f{border:1.5px solid var(--accent)}
+.cell .ic{width:12px;height:12px;stroke-width:2.4}
+.cell.pi::after{content:"";position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--bad);border:2px solid #fff}
+.mlegend{display:flex;gap:18px;padding:12px 20px;font-size:12px;color:var(--muted)}
+.mlegend span{display:inline-flex;align-items:center;gap:7px}
+.mlegend .cell{width:16px;height:16px;border-radius:4px}
+.rq{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.rq + .rq{border-top:1px solid var(--line-soft)}
+.rqh{display:flex;align-items:center;gap:12px}
+.rqh .bars{flex:1;max-width:420px}
+.delta{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:7px;font-size:12px;font-weight:600;background:var(--accent-soft);color:var(--accent)}
+.delta.down{background:var(--warn-soft);color:var(--warn)}
+.rqg{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:14px}
+.big{font-size:20px;font-weight:600;line-height:24px}
+.big small{font-size:13px;color:var(--faint);font-weight:400}
+.strip{position:relative;height:34px;margin-top:4px}
+.strip .ax{position:absolute;left:0;right:0;top:16px;height:2px;background:var(--line-soft);border-radius:1px}
+.strip .lim{position:absolute;top:4px;bottom:4px;width:0;border-left:1.5px dashed var(--muted)}
+.strip .lim span{position:absolute;top:-2px;left:5px;font-size:11px;color:var(--muted);white-space:nowrap}
+.strip i{position:absolute;top:12px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 1px var(--accent)}
+.strip i.over{background:var(--warn);box-shadow:0 0 0 1px var(--warn)}
+.strip .ends{position:absolute;top:24px;left:0;right:0;display:flex;justify-content:space-between;font-size:11px;color:var(--faint)}
+.nothing{font-size:13px;color:var(--faint)}
+.chg{display:flex;flex-direction:column;gap:10px;padding:16px 20px}
+.chg h4{font-size:12px;color:var(--faint);font-weight:500}
+.chg .row{display:flex;align-items:center;gap:12px}
+.chg .row .ic{color:var(--accent)}
+.chg .row .bars{flex:1;max-width:360px}
+.empty{padding:56px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty .ic{width:28px;height:28px;color:var(--faint)}
+.empty h3{font-size:16px}
+
+/* drawer, modal, toast */
+.scrim{position:fixed;inset:0;background:rgba(36,24,107,.22);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:100%;background:#fff;z-index:41;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(36,24,107,.16)}
+.drawer .dh{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.drawer .dh .bars{flex:1}
+.drawer .db{flex:1;overflow:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.drawer h5{margin:6px 0 0;font-size:12px;color:var(--faint);font-weight:500}
+.tcard{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.tcard .top{display:flex;align-items:center;gap:10px}
+.tcard .top b{font-weight:600}
+.tcard .top .grow{flex:1}
+.ochip{display:inline-flex;height:24px;border-radius:7px;border:1px dashed #CFCCDB;width:96px}
+.res{font-size:12px;font-weight:600}
+.res.p{color:var(--accent)} .res.f{color:var(--muted)}
+.modal-w{position:fixed;inset:0;display:grid;place-items:center;z-index:42;padding:20px}
+.modal{width:100%;max-width:460px;background:#fff;border-radius:16px;box-shadow:0 28px 70px rgba(36,24,107,.28);padding:24px;display:flex;flex-direction:column;gap:14px}
+.modal h3{font-size:18px}
+.modal p{color:var(--muted)}
+.modal .row{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--side);color:#fff;padding:11px 15px;border-radius:11px;display:flex;align-items:center;gap:8px;font-size:13px;z-index:60}
+@media (max-width:1200px){.exg{grid-template-columns:1fr 1fr}}
+body.embed .side{display:none}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
+  <symbol id="i-team" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5c2 .7 3 2.6 3.5 5.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M4 17l6-6 4 4 6-7"/><path d="M15 8h5v5"/></symbol>
+  <symbol id="i-flat" viewBox="0 0 24 24"><path d="M4 12h16"/><path d="M16 8l4 4-4 4"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-split" viewBox="0 0 24 24"><path d="M6 3v6a6 6 0 0 0 6 6h0a6 6 0 0 1 6 6M18 3v6"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+</svg>
+
+<div class="app">
+  <nav class="side" aria-label="Main">
+    <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M19 7.5A8 8 0 1 0 19 16.5"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg></span>Colare</div>
+    <a class="nav on" href="#"><svg class="ic"><use href="#i-grid"/></svg>Dashboard</a>
+    <a class="nav" href="#"><svg class="ic"><use href="#i-pen"/></svg>Author</a>
+    <a class="nav" href="#"><svg class="ic"><use href="#i-eye"/></svg>Reviewer</a>
+    <a class="nav" href="#"><svg class="ic"><use href="#i-user"/></svg>Tester</a>
+    <a class="nav" href="#"><svg class="ic"><use href="#i-team"/></svg>Team management</a>
+    <div class="me"><span class="av">MC</span><span><b>Maya Chen</b><small>Reviewer</small></span></div>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+<div id="layer"></div>
+
+<script>
+const ic = (n) => `<svg class="ic"><use href="#i-${n}"/></svg>`;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const LV = ['Junior', 'Junior', 'Junior', 'Mid', 'Mid', 'Mid', 'Senior', 'Senior'];
+
+/* Two rounds, 8 new testers each. r1/r2 = pass per tester, t1/t2 = minutes. */
+const Q = [
+  { id: 'q1', n: 1, lim: 8, v1: 2, v2: 2, r1: [1,0,1,1,1,0,1,1], r2: [1,1,0,1,1,1,1,1], t1: [7.2,8.4,6.9,7.1,6.4,7.5,6.0,7.3], t2: [7.0,6.8,7.6,6.5,6.9,7.1,5.9,6.6],
+    conf: 3.9, sugg: 'good', checks: [1, 1, 1], taps: [['Info not enough', 1]], plat: 0,
+    why: [['flat', 'Steady across both rounds'], ['check', 'Passes at every level'], ['clock', 'Finishes in time']] },
+  { id: 'q2', n: 2, lim: 12, v1: 3, v2: 4, r1: [0,0,0,1,0,0,1,1], r2: [1,0,1,1,1,0,1,1], t1: [12.6,12.4,11.9,11.2,12.8,11.5,11.8,10.9], t2: [9.4,10.8,8.9,9.1,8.7,10.2,8.5,9.0],
+    conf: 3.5, sugg: 'good', checks: [0, 0, 1], taps: [['Info not enough', 1]], plat: 0,
+    why: [['split', 'Split after round 1'], ['up', '3 → 6 of 8 after the change'], ['clock', 'Now well inside the limit']] },
+  { id: 'q3', n: 3, lim: 8, v1: 2, v2: 2, r1: [1,1,1,1,1,0,1,1], r2: [1,1,1,1,0,1,1,1], t1: [6.1,6.6,5.9,6.3,6.4,7.0,5.8,6.2], t2: [6.0,6.4,6.1,5.8,6.6,6.2,5.5,6.0],
+    conf: 3.9, sugg: 'good', checks: [1, 1, 1], taps: [['Reference not enough', 0]], plat: 3, platR2: 0,
+    why: [['file', 'File fixed after round 1'], ['flat', 'No platform issues in round 2'], ['check', 'Passes at every level']] },
+  { id: 'q4', n: 4, lim: 8, v1: 1, v2: 1, r1: [0,1,1,1,0,1,1,0], r2: [0,1,0,1,1,1,1,1], t1: [7.9,8.2,7.4,7.6,8.3,7.8,7.1,7.9], t2: [8.1,7.7,8.4,7.5,7.9,7.6,7.2,7.8],
+    conf: 3.2, sugg: 'change', checks: [1, 1, 1], taps: [['Time too short', 5]], plat: 0,
+    why: [['clock', 'At the limit in both rounds'], ['flat', '5 said time was too short'], ['check', 'Content is fine']] },
+];
+const TAPS = {
+  q1: { 1: [['Info not enough', 1]], 2: [] },
+  q2: { 1: [['Should be split', 4], ['Reference not enough', 1], ['Info not enough', 1]], 2: [['Info not enough', 1]] },
+  q3: { 1: [['Reference not enough', 3]], 2: [] },
+  q4: { 1: [['Time too short', 2]], 2: [['Time too short', 3]] },
+};
+const PLAT = { q3: { 1: 3, 2: 0 } };
+const CHANGED = { 2: [['q2', 'v3 → v4', 'split'], ['q3', 'File fixed', 'file']] };
+const CHECKS = ['Enough testers on this version', 'Both rounds agree', 'Same pattern at every level'];
+const EVL = ['Light', 'Light', 'Fair', 'Strong'];
+const RMETA = { 1: { type: 'Timed', ran: 'Oct 28 – Oct 30', warm: 7, plat: 3 }, 2: { type: 'Timed', ran: 'Nov 3 – Nov 5', warm: 7, plat: 0 } };
+
+const S = { dround: 2, tab: 'syn', rounds: [1, 2], extra: [], open: 'q2', dec: {}, cmt: {}, editing: null, ed: {}, sheet: null, mode: 'retest', note: '', drawer: null, modal: false, published: false, toast: '' };
+
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+const med = (a) => { const s = a.slice().sort((x, y) => x - y); return (s[3] + s[4]) / 2; };
+const mmss = (m) => `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, '0')}`;
+const evN = (q) => sum(q.checks);
+const dots = (a) => `<span class="dots">${a.map((p) => `<i class="${p ? 'p' : ''}"></i>`).join('')}</span>`;
+const tbars = (w1, w2) => `<span class="bars"><span class="bar t" style="width:${w1}%"></span><span class="bar" style="width:${w2}%"></span></span>`;
+const W = { q1: [72, 46], q2: [60, 38], q3: [80, 50], q4: [66, 42] };
+
+function header() {
+  const on = S.published ? 5 : 4;
+  return `
+  <header class="head"><div class="in">
+    <span class="logo">A</span>
+    <div><h1>Systems Engineer</h1><span class="co">Aster Orbital</span></div>
+    <span class="tag">${S.published ? 'Published Nov 5' : 'Due Nov 18'}</span>
+    <div class="prog"><b>${S.published ? 'Published' : 'Synthesizing results'}</b><span class="steps">${[1, 2, 3, 4, 5].map((k) => `<i class="${k <= on ? 'on' : ''}"></i>`).join('')}</span></div>
+  </div></header>`;
+}
+function tabs() {
+  return `
+  <div class="tabs" role="tablist">
+    <button class="tab ${S.tab === 'syn' ? 'on' : ''}" data-act="tab" data-id="syn">Synthesis</button>
+    ${[...S.rounds, ...S.extra].map((n) => `<button class="tab ${S.tab === 'r' + n ? 'on' : ''}" data-act="tab" data-id="r${n}">Round ${n}</button>`).join('')}
+    <button class="newr" data-act="newround">${ic('plus')}New round</button>
+  </div>`;
+}
+
+/* ---------- synthesis ---------- */
+function stateOf(q) { return S.dec[q.id] || null; }
+function synthesis() {
+  const appr = Q.filter((q) => S.dec[q.id] === 'good').length;
+  const allPub = appr === 4;
+  const decided = Object.keys(S.dec).length;
+  return `
+  <section class="card verdict">
+    <div class="l">
+      <span class="bar" style="width:22%"></span>
+      <span class="bar t" style="width:62%;height:16px"></span>
+      <div class="split"><i style="flex:${appr || 0.0001};background:var(--ok)"></i><i style="flex:${4 - appr || 0.0001};background:#E3E2EA"></i></div>
+      <div class="legend"><span><i style="background:var(--ok)"></i>${appr} approved</span><span><i style="background:#D3D1DC"></i>${4 - appr} not yet</span></div>
+    </div>
+    <div class="r">
+      <div><small>Testers</small><b>16</b><span class="bar" style="width:70%;margin-top:6px"></span></div>
+      <div><small>Rounds</small><b>2</b><span class="bar" style="width:50%;margin-top:6px"></span></div>
+      <div><small>Platform issues</small><b>3 → 0</b><span class="bar" style="width:62%;margin-top:6px"></span></div>
+    </div>
+  </section>
+
+  <div class="sech"><h3>Questions</h3></div>
+  <section class="card">
+    <div class="qhead"><span>Question</span><span>Version</span><span>Passed</span><span>Median time</span><span>Evidence${infoTip()}</span><span>Status</span><span></span></div>
+    ${Q.map(qrow).join('')}
+  </section>
+
+  <div class="foot">
+    ${S.published ? `<span class="pubok">${ic('check')}Published. Live for candidates.</span>` : `<span class="left">${appr} of 4 approved</span>${allPub ? `<button class="btn primary" data-act="publish">${ic('send')}Publish assessment</button>` : ''}`}
+  </div>`;
+}
+
+function statusChip(q) {
+  if (stateOf(q) === 'good') return '<span class="chip appr"><i></i>Approved</span>';
+  const e = S.ed[q.id];
+  if (e && e.mode === 'fix') return '<span class="chip change"><i></i>Not retested</span>';
+  if (e && e.mode === 'retest') return '<span class="chip queued"><i></i>Next round</span>';
+  return '<span class="dash">–</span>';
+}
+function curPass(q) { const a = q.v1 === q.v2 ? [...q.r1, ...q.r2] : q.r2; return [sum(a), a.length]; }
+function curMed(q) { return med(q.v1 === q.v2 ? [...q.t1, ...q.t2].sort((x, y) => x - y).filter((_, i) => i % 2) : q.t2); }
+function infoTip() {
+  return `<span class="info" tabindex="0" aria-label="About evidence">${ic('info')}<span class="tip"><b>How strongly the data backs this question</b>${CHECKS.map((c) => `<span>${c}</span>`).join('')}<br>3 checks = Strong, 2 = Fair, 1 = Light</span></span>`;
+}
+function qrow(q) {
+  const open = S.open === q.id;
+  const changed = q.v1 !== q.v2;
+  return `
+  <div class="qwrap ${open ? 'open' : ''}">
+    <button class="qrow" data-act="toggle" data-id="${q.id}" aria-expanded="${open}">
+      <span class="qname"><span class="qn">Q${q.n}</span>${tbars(...W[q.id])}</span>
+      <span class="ver">${S.ed[q.id] ? `<b>v${q.v2} → v${q.v2 + 1}</b>Edited` : changed ? `<b>v${q.v1} → v${q.v2}</b>Changed` : `<b>v${q.v2}</b>No change`}</span>
+      <span class="mini"><b>${curPass(q)[0]} of ${curPass(q)[1]}</b></span>
+      <span class="mini"><b>${mmss(curMed(q))}</b> <small>of ${q.lim}:00</small></span>
+      <span class="ev3"><span class="m">${q.checks.slice().sort((a, b) => b - a).map((c) => `<i class="${c ? 'on' : ''}"></i>`).join('')}</span><b>${EVL[evN(q)]}</b></span>
+      <span>${statusChip(q)}</span>
+      <span class="chev">${ic('down')}</span>
+    </button>
+    ${open ? expanded(q) : ''}
+  </div>`;
+}
+
+function expanded(q) {
+  const d = stateOf(q);
+  const ed = S.editing === q.id;
+  const pass = (lv) => { const ix = LV.map((l, i) => (l === lv ? i : -1)).filter((i) => i >= 0); const cur = q.v1 === q.v2 ? [...ix.map((i) => q.r1[i]), ...ix.map((i) => q.r2[i])] : ix.map((i) => q.r2[i]); return [sum(cur), cur.length]; };
+  return `
+  <div class="ex">
+    <div class="exg">
+      <div class="box"><h4><span>Evidence${infoTip()}</span><span class="ev3"><span class="m">${q.checks.slice().sort((a, b) => b - a).map((c) => `<i class="${c ? 'on' : ''}"></i>`).join('')}</span><b>${EVL[evN(q)]}</b></span></h4>
+        ${CHECKS.map((c, i) => `<div class="chk ${q.checks[i] ? 'y' : 'n'}"><span class="c">${q.checks[i] ? ic('check') : ''}</span>${c}</div>`).join('')}
+      </div>
+      <div class="box"><h4>Passed by level${q.v1 !== q.v2 ? '<span>v' + q.v2 + ' only</span>' : '<span>Both rounds</span>'}</h4>
+        ${['Junior', 'Mid', 'Senior'].map((lv) => { const [p, n] = pass(lv); return `<div class="lvl"><span>${lv}</span><span class="tb"><i style="width:${(p / n) * 100}%"></i></span><b>${p}/${n}</b></div>`; }).join('')}
+      </div>
+      <div class="box"><h4>Tester feedback</h4>
+        <div class="taps">
+          ${q.taps.map(([t, n]) => `<div><span>${t}</span><b>${n}</b></div>`).join('')}
+          <div><span>Platform issues</span><b>${q.plat ? `${q.plat} → ${q.platR2}` : 0}</b></div>
+          <div><span>Tester confidence</span><b>${q.conf} / 5</b></div>
+        </div>
+        <button class="btn link" data-act="drawer" data-id="${q.id}" style="align-self:flex-start">View full feedback</button>
+      </div>
+    </div>
+    ${S.ed[q.id] ? `<div class="enote">${ic(S.ed[q.id].mode === 'fix' ? 'pen' : 'flask')}<span><b>v${q.v2 + 1} saved.</b> ${S.ed[q.id].mode === 'fix' ? `Not retested. Evidence above is from v${q.v2}.` : 'Queued for the next round.'}</span></div>` : ''}
+    <div class="dec"><span class="grow"></span>
+      ${S.published ? '' : `
+      <button class="btn" data-act="edit" data-id="${q.id}" ${d === 'good' ? 'disabled' : ''}>${ic('pen')}Edit</button>
+      ${d === 'good' ? `<button class="btn" data-act="clear" data-id="${q.id}">${ic('x')}Unapprove</button>`
+        : `<button class="btn primary" data-act="good" data-id="${q.id}" ${S.ed[q.id] && S.ed[q.id].mode === 'retest' ? 'disabled' : ''}>${ic('check')}Approve</button>`}`}
+    </div>
+  </div>`;
+}
+
+/* ---------- round view: how each question performed ---------- */
+function roundView(n) {
+  if (!RMETA[n]) { const qd = Q.filter((q) => S.ed[q.id] && S.ed[q.id].mode === 'retest'); return `<section class="card empty">${ic('flask')}<h3>No results yet</h3>${qd.length ? `<span style="font-size:13px;color:var(--muted)">Queued for this round</span><div class="qchips">${qd.map((q) => `<span class="qn">Q${q.n}</span>`).join('')}</div>` : ''}<button class="btn primary" data-act="setup">${ic('team')}Set up testers</button></section>`; }
+  const m = RMETA[n];
+  const key = n === 1 ? 'r1' : 'r2', tk = n === 1 ? 't1' : 't2', vk = n === 1 ? 'v1' : 'v2';
+  const prev = n > 1;
+  const lvl = (q, lv) => { const ix = LV.map((l, i) => (l === lv ? i : -1)).filter((i) => i >= 0); return [ix.filter((i) => q[key][i]).length, ix.length]; };
+  const strip = (q) => {
+    const max = q.lim * 1.25;
+    const pos = (t) => Math.min(100, (t / max) * 100);
+    return `<div class="strip"><span class="ax"></span><span class="lim" style="left:${pos(q.lim)}%"><span>${q.lim}:00 limit</span></span>
+      ${q[tk].map((t) => `<i class="${t > q.lim ? 'over' : ''}" style="left:${pos(t)}%" title="${mmss(t)}"></i>`).join('')}
+      <span class="ends"><span>0:00</span><span>${mmss(max)}</span></span></div>`;
+  };
+  const deltas = (q) => {
+    if (!prev) return '';
+    const dp = sum(q.r2) - sum(q.r1);
+    const dt = med(q.t2) - med(q.t1);
+    const out = [];
+    if (dp) out.push(`<span class="delta ${dp < 0 ? 'down' : ''}">${dp > 0 ? '+' : '−'}${Math.abs(dp)} passed</span>`);
+    if (Math.abs(dt) >= 0.25) out.push(`<span class="delta ${dt > 0 ? 'down' : ''}">${dt < 0 ? '−' : '+'}${mmss(Math.abs(dt))} median</span>`);
+    return out.join('') || '<span class="tag">Same as round 1</span>';
+  };
+  const chg = CHANGED[n] || [];
+  return `
+  <section class="card"><div class="rmeta">
+    <div><small>Type</small><b>${m.type}</b></div>
+    <div><small>Testers</small><b>8</b></div>
+    <div><small>Mix</small><b>3 junior, 3 mid, 2 senior</b></div>
+    <div><small>Ran</small><b>${m.ran}</b></div>
+    <div><small>Platform issues</small><b>${m.plat}</b></div>
+  </div></section>
+
+  ${chg.length ? `<section class="card chg"><h4>Changed going into this round</h4>${chg.map(([id, what, i]) => { const q = Q.find((x) => x.id === id); return `<div class="row"><span class="qn">Q${q.n}</span>${ic(i)}<b style="font-weight:500;min-width:80px">${what}</b><span class="bars"><span class="bar" style="width:${id === 'q2' ? 80 : 56}%"></span></span></div>`; }).join('')}</section>` : ''}
+
+  <div class="sech"><h3>How each question did</h3></div>
+  <section class="card">
+    ${Q.map((q) => { const taps = TAPS[q.id][n]; const plat = (PLAT[q.id] || {})[n] || 0; return `
+    <div class="rq">
+      <div class="rqh"><span class="qn">Q${q.n}</span>${tbars(...W[q.id])}<span class="tag">v${q[vk]}</span><span style="flex:1"></span>${deltas(q)}</div>
+      <div class="rqg">
+        <div class="box"><h4>Passed</h4><span class="big">${sum(q[key])} <small>of 8</small></span>
+          ${['Junior', 'Mid', 'Senior'].map((lv) => { const [p, c] = lvl(q, lv); return `<div class="lvl"><span>${lv}</span><span class="tb"><i style="width:${(p / c) * 100}%"></i></span><b>${p}/${c}</b></div>`; }).join('')}
+        </div>
+        <div class="box"><h4>Time<span>${q[tk].filter((t) => t > q.lim).length} went over</span></h4><span class="big">${mmss(med(q[tk]))} <small>median</small></span>${strip(q)}</div>
+        <div class="box"><h4>Flagged by testers</h4>
+          ${taps.length || plat ? `<div class="taps">${taps.map(([t, c]) => `<div><span>${t}</span><b>${c}</b></div>`).join('')}${plat ? `<div><span>Platform issue</span><b style="color:var(--bad)">${plat}</b></div>` : ''}</div>` : '<span class="nothing">Nothing flagged</span>'}
+          <button class="btn link" data-act="drawer" data-id="${q.id}" data-r="${n}" style="align-self:flex-start;margin-top:auto">View full feedback</button>
+        </div>
+      </div>
+    </div>`; }).join('')}
+  </section>`;
+}
+
+/* ---------- overlays ---------- */
+function drawer() {
+  const q = Q.find((x) => x.id === S.drawer);
+  const block = (n) => {
+    const key = n === 1 ? 'r1' : 'r2', tk = n === 1 ? 't1' : 't2';
+    return `<h5>Round ${n} · v${q[n === 1 ? 'v1' : 'v2']}</h5>` + LV.map((lv, i) => `
+    <div class="tcard">
+      <div class="top"><b>Tester ${(n - 1) * 8 + i + 1}</b><span class="tag">${lv}</span><span class="grow"></span><span class="res ${q[key][i] ? 'p' : 'f'}">${q[key][i] ? 'Passed' : 'Didn\'t pass'}</span><span class="tag">${mmss(q[tk][i])} of ${q.lim}:00</span></div>
+      <div style="display:flex;gap:6px"><span class="ochip"></span>${i % 2 ? '<span class="ochip" style="width:70px"></span>' : ''}</div>
+      ${i === 4 ? '<span style="font-size:13px;color:var(--faint)">No comment</span>' : `<div class="bars"><span class="bar" style="width:94%"></span><span class="bar" style="width:${60 + (i * 7) % 30}%"></span>${i % 3 === 0 ? '<span class="bar" style="width:42%"></span>' : ''}</div>`}
+    </div>`).join('');
+  };
+  return `
+  <div class="scrim" data-act="close"></div>
+  <aside class="drawer" role="dialog" aria-label="Full feedback">
+    <div class="dh"><span class="qn">Q${q.n}</span>${tbars(...W[q.id])}<span class="tag">8 testers per round</span><button class="btn quiet sm" data-act="close" aria-label="Close">${ic('x')}</button></div>
+    <div class="seg2" role="tablist" style="margin-top:14px;align-self:flex-start">${[1, 2].map((n) => `<button class="${S.dround === n ? 'on' : ''}" data-act="dround" data-id="${n}">Round ${n}</button>`).join('')}</div>
+    <div class="db">${block(S.dround)}</div>
+  </aside>`;
+}
+function sheet() {
+  const q = Q.find((x) => x.id === S.sheet);
+  const v = q.v2 + 1;
+  return `
+  <div class="scrim" data-act="close"></div>
+  <aside class="drawer" role="dialog" aria-label="Edit question">
+    <div class="dh"><span class="qn">Q${q.n}</span><b style="flex:1;font-weight:600">Author view · editing v${v}</b><button class="btn quiet sm" data-act="close" aria-label="Close">${ic('x')}</button></div>
+    <div class="db">
+      <div class="syn"><span class="h">From synthesis · v${q.v2}</span><span>Passed <b>${curPass(q)[0]} of ${curPass(q)[1]}</b></span><span>Median <b>${mmss(curMed(q))}</b> of ${q.lim}:00</span><span>Evidence <b>${EVL[evN(q)]}</b></span></div>
+      <div class="fld"><label>Question</label><div class="fbox"><span class="bar t" style="width:64%"></span></div></div>
+      <div class="fld"><label>Prompt for candidate</label><div class="fbox"><span class="bar" style="width:92%"></span><span class="bar" style="width:84%"></span><span class="bar" style="width:40%"></span></div></div>
+      <div class="fld"><label>Note for the team</label><div class="fbox"><span class="bar" style="width:70%"></span></div></div>
+      <div class="fld"><label>After saving</label>
+        <button class="opt ${S.mode === 'retest' ? 'on' : ''}" data-act="mode" data-id="retest"><span class="rd"></span><span><b>Retest in the next round</b><span class="bar" style="width:180px;margin-top:6px"></span></span></button>
+        <button class="opt ${S.mode === 'fix' ? 'on' : ''}" data-act="mode" data-id="fix"><span class="rd"></span><span><b>Small fix, no retest</b><span class="bar" style="width:220px;margin-top:6px"></span></span></button>
+      </div>
+    </div>
+    <div class="dh" style="border-top:1px solid var(--line);border-bottom:0;justify-content:flex-end"><button class="btn quiet" data-act="close">Cancel</button><button class="btn primary" data-act="savev">Save v${v}</button></div>
+  </aside>`;
+}
+function modal() {
+  return `
+  <div class="scrim" data-act="close"></div>
+  <div class="modal-w"><div class="modal" role="dialog" aria-label="Publish assessment">
+    <h3>Publish assessment?</h3>
+    <p>4 questions, tested with 16 testers over 2 rounds. Candidates will see this version.</p>
+    <div class="row"><button class="btn quiet" data-act="close">Cancel</button><button class="btn primary" data-act="dopublish">${ic('send')}Publish</button></div>
+  </div></div>`;
+}
+
+function render() {
+  const n = S.tab.startsWith('r') ? Number(S.tab.slice(1)) : 0;
+  document.getElementById('main').innerHTML = `${header()}<div class="body">${tabs()}${n ? roundView(n) : synthesis()}</div>`;
+  document.getElementById('layer').innerHTML = (S.drawer ? drawer() : '') + (S.sheet ? sheet() : '') + (S.modal ? modal() : '') + (S.toast ? `<div class="toast">${ic('check')}${esc(S.toast)}</div>` : '');
+}
+let tt;
+function toast(t) { S.toast = t; clearTimeout(tt); tt = setTimeout(() => { S.toast = ''; render(); }, 2400); }
+const A = {
+  tab: (id) => { S.tab = id; },
+  newround: () => { const n = 2 + S.extra.length + 1; S.extra.push(n); S.tab = 'r' + n; },
+  setup: () => { if (window.parent !== window) window.parent.postMessage({ go: 'reviewer' }, '*'); else toast('Opens the Reviewer\'s Testers step'); },
+  toggle: (id) => { S.open = S.open === id ? null : id; S.editing = null; },
+  good: (id) => { S.dec[id] = 'good'; },
+  edit: (id) => { S.sheet = id; S.mode = (S.ed[id] && S.ed[id].mode) || 'retest'; },
+  mode: (m) => { S.mode = m; },
+  savev: () => { const id = S.sheet; S.ed[id] = { mode: S.mode }; S.sheet = null; toast(S.mode === 'fix' ? 'Saved. Ready to approve.' : 'Saved. Queued for the next round.'); },
+  clear: (id) => { delete S.dec[id]; delete S.cmt[id]; },
+  drawer: (id, el) => { S.drawer = id; S.dround = el && el.dataset.r ? Number(el.dataset.r) : 2; },
+  dround: (id) => { S.dround = Number(id); },
+  close: () => { S.drawer = null; S.modal = false; S.sheet = null; },
+  publish: () => { S.modal = true; },
+  dopublish: () => { S.modal = false; S.published = true; toast('Assessment published'); },
+};
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) return;
+  const f = A[el.dataset.act];
+  if (f) { f(el.dataset.id, el); render(); }
+});
+document.addEventListener('input', (e) => { if (e.target.dataset.field === 'cmt') S.cmt[e.target.dataset.id] = e.target.value; });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && (S.drawer || S.modal || S.sheet)) { A.close(); render(); } });
+if (window.self !== window.top) document.body.classList.add('embed');
+render();
+</script>
+</body>
+</html>
